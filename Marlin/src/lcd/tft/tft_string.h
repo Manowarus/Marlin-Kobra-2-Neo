@@ -107,8 +107,8 @@ class TFT_String {
     static uint16_t font_ascent() { return font_header->fontAscent; }
     static uint16_t font_height() { return font_header->fontAscent - font_header->fontDescent; }
 
-    static glyph_t *glyph(uint16_t character);
-    static glyph_t *glyph(uint16_t *character) { return glyph(*character); }
+    static glyph_t *glyph(uint16_t character, uint8_t *fontType=nullptr);
+    static glyph_t *glyph(uint16_t *character, uint8_t *fontType=nullptr) { return glyph(*character, fontType); }
 
     /**
      * @brief Set the string empty

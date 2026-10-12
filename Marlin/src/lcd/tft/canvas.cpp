@@ -75,21 +75,24 @@ void Canvas::addText(uint16_t x, uint16_t y, uint16_t color, uint16_t *string, u
   if (maxWidth == 0) maxWidth = width - x;
 
   uint16_t colors[16];
+  bool colors_ready = false;          // 2bpp colors depend only on text/background
   uint16_t stringWidth = 0;
-  if (getFontType() == FONT_MARLIN_GLYPHS_2BPP) {
-    for (uint8_t i = 0; i < 3; i++) {
-      colors[i] = gradient(ENDIAN_COLOR(color), ENDIAN_COLOR(background_color), ((i+1) << 8) / 3);
-      colors[i] = ENDIAN_COLOR(colors[i]);
-    }
-  }
   for (uint16_t i = 0 ; *(string + i) ; i++) {
-    glyph_t *pGlyph = glyph(string + i);
+    uint8_t glyphType;
+    glyph_t *pGlyph = glyph(string + i, &glyphType);
     if (stringWidth + pGlyph->bbxWidth > maxWidth) break;
-    switch (getFontType()) {
+    switch (glyphType) {
       case FONT_MARLIN_GLYPHS_1BPP:
         addImage(x + stringWidth + pGlyph->bbxOffsetX, y + getFontAscent() - pGlyph->bbxHeight - pGlyph->bbxOffsetY, pGlyph->bbxWidth, pGlyph->bbxHeight, GREYSCALE1, ((uint8_t *)pGlyph) + sizeof(glyph_t), &color);
         break;
       case FONT_MARLIN_GLYPHS_2BPP:
+        if (!colors_ready) {
+          for (uint8_t j = 0; j < 3; j++) {
+            colors[j] = gradient(ENDIAN_COLOR(color), ENDIAN_COLOR(background_color), ((j+1) << 8) / 3);
+            colors[j] = ENDIAN_COLOR(colors[j]);
+          }
+          colors_ready = true;
+        }
         addImage(x + stringWidth + pGlyph->bbxOffsetX, y + getFontAscent() - pGlyph->bbxHeight - pGlyph->bbxOffsetY, pGlyph->bbxWidth, pGlyph->bbxHeight, GREYSCALE2, ((uint8_t *)pGlyph) + sizeof(glyph_t), colors);
         break;
     }

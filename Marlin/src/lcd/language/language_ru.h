@@ -42,7 +42,7 @@ namespace LanguageNarrow_ru {
   using namespace Language_en; // Inherit undefined strings from English
 
   constexpr uint8_t CHARSIZE              = 2;
-  LSTR LANGUAGE                           = _UxGT("Russian");
+  LSTR LANGUAGE                           = _UxGT("Русский");
 
   LSTR WELCOME_MSG                        = MACHINE_NAME_SUBST _UxGT(" Готов.");               // (MACHINE_NAME_SUBST) Ready.
   LSTR MSG_MEDIA_INSERTED                 = _UxGT("SD карта вставлена");                       // (MEDIA_TYPE_EN) Inserted

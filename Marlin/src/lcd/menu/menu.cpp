@@ -29,6 +29,7 @@
 #include "../../module/motion.h"
 #include "../../module/printcounter.h"
 #include "../../module/temperature.h"
+#include "../../module/settings.h"
 #include "../../gcode/queue.h"
 
 #if HAS_GRAPHICAL_TFT
@@ -143,8 +144,13 @@ void MenuEditItemBase::edit_screen(strfunc_t strfunc, loadfunc_t loadfunc) {
     if (editValue) loadfunc(editValue, ui.encoderPosition + minEditValue);
     // If a callbackFunc was set, call it for click or always for "live editing"
     if (callbackFunc && (liveEdit || ui.lcd_clicked)) (*callbackFunc)();
-    // Use up the click to finish editing and go to the previous screen
-    if (ui.use_click()) ui.goto_previous_screen();
+    // Use up the click to finish editing, store the settings and go to the previous screen
+    if (ui.use_click()) {
+      TERN_(EEPROM_SETTINGS, settings.save());
+      ui.clear_all = false;         // Return to the menus with the sidebar
+      ui.goto_previous_screen();
+      ui.previous_callbackFunc();
+    }
   }
 }
 
@@ -163,6 +169,7 @@ void MenuEditItemBase::goto_edit_screen(
 ) {
   TERN_(HAS_TOUCH_BUTTONS, ui.on_edit_screen = true);
   ui.screen_changed = true;
+  ui.clear_all = true;              // Edit screens are full-screen (no sidebar)
   ui.push_current_screen();
   ui.refresh();
   editLabel = el;

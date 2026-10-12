@@ -44,4 +44,5 @@
 #endif
 
 #define COLOR_MENU_TEXT         COLOR_WHITE
+#define COLOR_MENU_EDIT_TEXT    COLOR_MENU_TEXT   // Factory: editable items use the normal text color (upstream default is green)
 #define COLOR_SLIDER_INACTIVE   0xA554
