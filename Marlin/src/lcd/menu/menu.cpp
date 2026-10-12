@@ -1186,18 +1186,12 @@ void menu_about() {
     if (ui.should_draw()) {
       ui.flexible_clear_lcd(0, 0, TFT_WIDTH, TFT_HEIGHT);
 
-      constexpr uint8_t cell = _MIN((TFT_WIDTH - 8) / (GRID_MAX_POINTS_X), (TFT_HEIGHT - 34) / (GRID_MAX_POINTS_Y));
+      constexpr uint8_t cell = _MIN((TFT_WIDTH - 8) / (GRID_MAX_POINTS_X), (TFT_HEIGHT - 8) / (GRID_MAX_POINTS_Y));
       constexpr int16_t gx = _MAX(0, (TFT_WIDTH - (GRID_MAX_POINTS_X) * cell) / 2),
-                        gy = 30;
-
-      tft.canvas(0, 4, TFT_WIDTH, 24);
-      tft.set_background(COLOR_BACKGROUND);
-      tft_string.set(GET_TEXT_F(MSG_MESH_VIEWER));
-      tft_string.trim();
-      tft.add_text(tft_string.center(TFT_WIDTH), 4, COLOR_MENU_TEXT, tft_string);
+                        gy = _MAX(0, (TFT_HEIGHT - (GRID_MAX_POINTS_Y) * cell) / 2);
 
       if (!bedlevel.mesh_is_valid()) {
-        tft.canvas(0, gy + 70, TFT_WIDTH, 24);
+        tft.canvas(0, gy + ((GRID_MAX_POINTS_Y) * cell - 24) / 2, TFT_WIDTH, 24);
         tft.set_background(COLOR_BACKGROUND);
         tft_string.set(GET_TEXT_F(MSG_NO_VALID_MESH));
         tft_string.trim();
@@ -1236,7 +1230,7 @@ void menu_about() {
                 const int t10 = _MIN(99, int(az * 10.0f + 0.5f));
                 vbuf[0] = char('0' + t10 / 10); vbuf[1] = '.'; vbuf[2] = char('0' + t10 % 10); vbuf[3] = 0;
               }
-              const uint16_t ty = cy >= 2 ? cy - 2 : 0;
+              const uint16_t ty = cy + (cell > 26 ? (cell - 26) / 2 : 0);  // Two text lines (~26px) centered in the cell
               tft_string.set(sbuf);
               tft.add_text(cx + tft_string.center(cell), ty, COLOR_MENU_TEXT, tft_string);
               tft_string.set(vbuf);
