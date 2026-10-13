@@ -789,14 +789,14 @@ void MarlinUI::init() {
             else if (!Paused && !busy) {
               #if HAS_PREHEAT
                 if (preheat_select == 0) {
-                  thermalManager.setTargetHotend(190, 0);
-                  thermalManager.setTargetBed(60);
+                  TERN_(HAS_HOTEND,     thermalManager.setTargetHotend(190, 0));
+                  TERN_(HAS_HEATED_BED, thermalManager.setTargetBed(60));
                 }
                 else
                   apply_preheat(preheat_select - 1, PT_ALL);
               #else
-                thermalManager.setTargetHotend(190, 0);
-                thermalManager.setTargetBed(60);
+                TERN_(HAS_HOTEND,     thermalManager.setTargetHotend(190, 0));
+                TERN_(HAS_HEATED_BED, thermalManager.setTargetBed(60));
               #endif
             }
             break;
