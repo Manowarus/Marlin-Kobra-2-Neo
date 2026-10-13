@@ -252,6 +252,7 @@ public:
   static bool clear_all;             // Draw full-screen (hide the factory sidebar)
   static bool confirm_windown_enabled, last_confirm_windown_enabled;
   static bool module_calibration_flag;
+  static int8_t soft_endstop_saved;  // Saved soft-endstop state for the calibration jog (-1 = none)
   static bool model_fan_enabled;
   static bool real_duration_state;
   static float temp_probe_zoffset;

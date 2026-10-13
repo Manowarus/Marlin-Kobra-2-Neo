@@ -60,7 +60,10 @@ void lcd_move_axis(const AxisEnum axis) {
       if (ui.module_calibration_flag == true && motion.soft_endstop._enabled == false) {
         autoProbe.calibration_positon.x = motion.position.x;
         autoProbe.calibration_positon.y = motion.position.y;
-        motion.soft_endstop._enabled = true; // Jog finished: soft endstops back on
+        if (ui.soft_endstop_saved >= 0) { // Jog finished: restore the user's soft-endstop state
+          motion.soft_endstop._enabled = ui.soft_endstop_saved;
+          ui.soft_endstop_saved = -1;
+        }
       }
     #endif
     ui.module_calibration_flag = false;

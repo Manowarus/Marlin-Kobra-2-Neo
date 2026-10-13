@@ -470,6 +470,7 @@ void MarlinUI::init() {
     bool MarlinUI::clear_all;
     bool MarlinUI::confirm_windown_enabled, MarlinUI::last_confirm_windown_enabled;
     bool MarlinUI::module_calibration_flag;
+    int8_t MarlinUI::soft_endstop_saved = -1;
     bool MarlinUI::model_fan_enabled;
     bool MarlinUI::real_duration_state;
     float MarlinUI::temp_probe_zoffset;
@@ -484,10 +485,11 @@ void MarlinUI::init() {
 
     void MarlinUI::back_callbackFunc() {
       manual_move.menu_scale = 1.0;
-      if (module_calibration_flag) {          // Jog flow changed it: restore and end the flow
-        motion.soft_endstop._enabled = true;
-        module_calibration_flag = false;
+      if (soft_endstop_saved >= 0) {          // Jog flow changed it: restore the user's state
+        motion.soft_endstop._enabled = soft_endstop_saved;
+        soft_endstop_saved = -1;
       }
+      module_calibration_flag = false;
     }
 
     screenFunc_t MarlinUI::currentScreen; // Initialized in CTOR

@@ -283,16 +283,16 @@ void menu_calibration_cleanup() {
     endstops.enable_globally(false);
     calibration_endstops_on = false;
   }
-  if (ui.module_calibration_flag) {
-    motion.soft_endstop._enabled = true;
-    ui.module_calibration_flag = false;
+  if (ui.soft_endstop_saved >= 0) { // Jog flow changed it: restore the user's state
+    motion.soft_endstop._enabled = ui.soft_endstop_saved;
+    ui.soft_endstop_saved = -1;
   }
+  ui.module_calibration_flag = false;
 }
 
 void menu_calibration() {
   // Poll the X/Y limit switches while this menu (and its jog screens) is open;
   // stay off during a job so a host-started print cannot be aborted
-  if (!marlin.printJobOngoing() && !endstops.global_enabled()) {
     endstops.enable_globally(true);
     calibration_endstops_on = true;
   }
@@ -301,10 +301,26 @@ void menu_calibration() {
   ACTION_ITEM(MSG_POSITION_CALIBRATION, move_calibration);
   ACTION_ITEM(MSG_BUTTON_SAVE, save_calibration);
 
-  SUBMENU_N(X_AXIS, MSG_MOVE_X_1MM,  []{ motion.soft_endstop._enabled = false; ui.module_calibration_flag = true; ui.manual_move.menu_scale = 1;    lcd_move_axis(X_AXIS); });
-  SUBMENU_N(X_AXIS, MSG_MOVE_X_01MM, []{ motion.soft_endstop._enabled = false; ui.module_calibration_flag = true; ui.manual_move.menu_scale = 0.1; lcd_move_axis(X_AXIS); });
-  SUBMENU_N(Y_AXIS, MSG_MOVE_Y_1MM,  []{ motion.soft_endstop._enabled = false; ui.module_calibration_flag = true; ui.manual_move.menu_scale = 1;    lcd_move_axis(Y_AXIS); });
-  SUBMENU_N(Y_AXIS, MSG_MOVE_Y_01MM, []{ motion.soft_endstop._enabled = false; ui.module_calibration_flag = true; ui.manual_move.menu_scale = 0.1; lcd_move_axis(Y_AXIS); });
+  SUBMENU_N(X_AXIS, MSG_MOVE_X_1MM, []{
+    if (ui.soft_endstop_saved < 0) ui.soft_endstop_saved = motion.soft_endstop._enabled;
+    motion.soft_endstop._enabled = false;
+    ui.module_calibration_flag = true; ui.manual_move.menu_scale = 1; lcd_move_axis(X_AXIS);
+  });
+  SUBMENU_N(X_AXIS, MSG_MOVE_X_01MM, []{
+    if (ui.soft_endstop_saved < 0) ui.soft_endstop_saved = motion.soft_endstop._enabled;
+    motion.soft_endstop._enabled = false;
+    ui.module_calibration_flag = true; ui.manual_move.menu_scale = 0.1; lcd_move_axis(X_AXIS);
+  });
+  SUBMENU_N(Y_AXIS, MSG_MOVE_Y_1MM, []{
+    if (ui.soft_endstop_saved < 0) ui.soft_endstop_saved = motion.soft_endstop._enabled;
+    motion.soft_endstop._enabled = false;
+    ui.module_calibration_flag = true; ui.manual_move.menu_scale = 1; lcd_move_axis(Y_AXIS);
+  });
+  SUBMENU_N(Y_AXIS, MSG_MOVE_Y_01MM, []{
+    if (ui.soft_endstop_saved < 0) ui.soft_endstop_saved = motion.soft_endstop._enabled;
+    motion.soft_endstop._enabled = false;
+    ui.module_calibration_flag = true; ui.manual_move.menu_scale = 0.1; lcd_move_axis(Y_AXIS);
+  });
 
   END_MENU();
 }
