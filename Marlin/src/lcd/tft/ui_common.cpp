@@ -39,6 +39,7 @@
 
 motionAxisState_t motionAxisState;
 static xy_uint_t cursor;
+static uint16_t menu_canvas_width;
 #if ENABLED(TOUCH_SCREEN)
   bool draw_menu_navigation = false;
 #endif
@@ -221,17 +222,20 @@ void menu_line(const uint8_t row, uint16_t color) {
   if (!ui.clear_all && !ui.confirm_windown_enabled && (ui.seclect == 1 || ui.seclect == 2)) {
     // Keep the factory sidebar visible
     cursor.set(50, row);
-    tft.canvas(50, MENU_TOP_LINE_Y + cursor.y * MENU_LINE_HEIGHT, TFT_WIDTH - 50, MENU_ITEM_HEIGHT);
+    menu_canvas_width = TFT_WIDTH - 50;
+    tft.canvas(50, MENU_TOP_LINE_Y + cursor.y * MENU_LINE_HEIGHT, menu_canvas_width, MENU_ITEM_HEIGHT);
     tft.set_background(color);
   }
   else {
     if (!ui.clear_all) {
       cursor.set(20, row);
-      tft.canvas(20, MENU_TOP_LINE_Y + cursor.y * MENU_LINE_HEIGHT, TFT_WIDTH - 40, MENU_ITEM_HEIGHT);
+      menu_canvas_width = TFT_WIDTH - 40;
+      tft.canvas(20, MENU_TOP_LINE_Y + cursor.y * MENU_LINE_HEIGHT, menu_canvas_width, MENU_ITEM_HEIGHT);
     }
     else {
       cursor.set(0, row);
-      tft.canvas(0, MENU_TOP_LINE_Y + cursor.y * MENU_LINE_HEIGHT, TFT_WIDTH, MENU_ITEM_HEIGHT);
+      menu_canvas_width = TFT_WIDTH;
+      tft.canvas(0, MENU_TOP_LINE_Y + cursor.y * MENU_LINE_HEIGHT, menu_canvas_width, MENU_ITEM_HEIGHT);
     }
     tft.set_background(color);
   }
@@ -380,7 +384,7 @@ void MenuItemBase::_draw(const bool sel, const uint8_t row, FSTR_P const ftpl, c
   tft.add_text(text_x + line_shift, MENU_TEXT_Y, color, tft_string);
 
   if (post_char == LCD_STR_ARROW_RIGHT[0])
-    tft.add_image(MENU_ITEM_SUBMENU_ICON_X, MENU_ITEM_ICON_Y, imgRight, color, lineColor);
+    tft.add_image(menu_canvas_width - (TFT_WIDTH - MENU_ITEM_SUBMENU_ICON_X), MENU_ITEM_ICON_Y, imgRight, color, lineColor);
 }
 
 // Draw a menu item with a (potentially) editable value
@@ -392,7 +396,7 @@ void MenuEditItemBase::draw(const bool sel, const uint8_t row, FSTR_P const ftpl
   tft.add_text(text_x, MENU_TEXT_Y, COLOR_MENU_EDIT_TEXT, tft_string);
   if (inStr) {
     tft_string.set(inStr);
-    tft.add_text(MENU_EDIT_ITEM_RIGHT_X - tft_string.width(), MENU_TEXT_Y, COLOR_MENU_VALUE, tft_string);
+    tft.add_text(menu_canvas_width - (TFT_WIDTH - MENU_EDIT_ITEM_RIGHT_X) - tft_string.width(), MENU_TEXT_Y, COLOR_MENU_VALUE, tft_string);
   }
 }
 
@@ -423,7 +427,7 @@ void MenuItem_static::draw(const uint8_t row, FSTR_P const ftpl, const uint8_t s
   // Right-justified value, after spaces
   while (*vstr == ' ') vstr++;
   tft_string.set(vstr);
-  tft.add_text(TFT_WIDTH - 1 - tft_string.width(), MENU_TEXT_Y, color, tft_string);
+  tft.add_text(menu_canvas_width - 1 - tft_string.width(), MENU_TEXT_Y, color, tft_string);
 }
 
 #if HAS_MEDIA
