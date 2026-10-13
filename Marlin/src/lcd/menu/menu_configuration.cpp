@@ -533,9 +533,11 @@ void menu_language();
   void menu_preheat_select() {
     START_MENU();
     BACK_ITEM(MSG_CONFIGURATION);
-    ACTION_ITEM_f(GET_TEXT_F(MSG_PREHEAT_FACTORY), MSG_PREHEAT_SELECT_ITEM, []{ ui.set_preheat_select(0); });
-    for (uint8_t m = 0; m < PREHEAT_COUNT; ++m)
-      ACTION_ITEM_N_f(m + 1, ui.get_preheat_label(m), MSG_PREHEAT_SELECT_ITEM, []{ ui.set_preheat_select(MenuItemBase::itemIndex); });
+    if (!marlin.printJobOngoing()) { // No flash writes while a job is ongoing
+      ACTION_ITEM_f(GET_TEXT_F(MSG_PREHEAT_FACTORY), MSG_PREHEAT_SELECT_ITEM, []{ ui.set_preheat_select(0); });
+      for (uint8_t m = 0; m < PREHEAT_COUNT; ++m)
+        ACTION_ITEM_N_f(m + 1, ui.get_preheat_label(m), MSG_PREHEAT_SELECT_ITEM, []{ ui.set_preheat_select(MenuItemBase::itemIndex); });
+    }
     END_MENU();
   }
 
