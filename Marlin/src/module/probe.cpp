@@ -1063,6 +1063,7 @@ float Probe::probe_at_point(
     // Deploy succeeded and a successful measurement was done.
     // Raise and/or stow the probe depending on 'raise_after' and settings.
     if (!isnan(measured_z)) {
+      TERN_(PROBING_PART_COOLING_FAN, thermalManager.set_fan_speed(0, 255)); // Stock: fan back on after a successful probe
       switch (raise_after) {
         default: break;
         case PROBE_PT_RAISE:
