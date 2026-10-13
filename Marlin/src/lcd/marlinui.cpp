@@ -1105,6 +1105,7 @@ void MarlinUI::init() {
         autoProbe.fan_control();
       #endif
       unload_load_filament();
+      factory_ui_tick();
 
       // If the action button is pressed...
       static bool wait_for_unclick; // = false

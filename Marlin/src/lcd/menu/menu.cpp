@@ -1045,7 +1045,6 @@ void lcd_level_top_windown() {
     tft.set_background(COLOR_BACKGROUND);
     tft.add_image(0, 0, imgConfirm, confirm_color);
   }
-  ui.refresh(LCDVIEW_CALL_REDRAW_NEXT);
 }
 
 // Factory filament load/unload flow
@@ -1103,7 +1102,6 @@ void draw_unload_load_filament() {
     tft_string.trim();
     tft.add_text(tft_string.center(160), 12, COLOR_WHITE, tft_string);
   }
-  ui.refresh(LCDVIEW_CALL_REDRAW_NEXT);
 }
 
 void preheat_to_move_E() {
@@ -1138,7 +1136,18 @@ void preheat_to_move_E() {
       ui.goto_screen(draw_unload_load_filament);
     }
   }
-  ui.refresh(LCDVIEW_CALL_REDRAW_NEXT);
+}
+
+// Periodic redraw for factory screens that show live values, at a low rate
+void factory_ui_tick() {
+  static millis_t next_tick_ms = 0;
+  const millis_t ms = millis();
+  const bool leveling = ui.currentScreen == lcd_level_top_windown;
+  if (!leveling && ui.currentScreen != preheat_to_move_E) return;
+  if (ELAPSED(ms, next_tick_ms)) {
+    next_tick_ms = ms + (leveling ? 250 : 1000);
+    ui.refresh(LCDVIEW_REDRAW_NOW);
+  }
 }
 
 // Factory About screen

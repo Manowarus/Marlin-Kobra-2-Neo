@@ -268,6 +268,7 @@ void lcd_level_top_windown();
 void unload_load_filament();
 void draw_unload_load_filament();
 void preheat_to_move_E();
+void factory_ui_tick();
 void filament_change();
 void menu_calibration();
 void lcd_level_task();
