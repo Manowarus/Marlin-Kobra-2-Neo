@@ -153,6 +153,7 @@ constexpr uint8_t epps = ENCODER_PULSES_PER_STEP;
 
 #if HAS_PREHEAT
   preheat_t MarlinUI::material_preset[PREHEAT_COUNT];  // Initialized by settings.load
+  uint8_t MarlinUI::preheat_select;                    // 0 = factory 190/60, restored from the calibration flash
 
   void MarlinUI::reset_material_presets() {
     #define _PITEM(N,T) PREHEAT_##N##_##T,
@@ -182,6 +183,19 @@ constexpr uint8_t epps = ENCODER_PULSES_PER_STEP;
     REPEAT_1(PREHEAT_COUNT, _PDEF);
     static PGM_P const preheat_labels[PREHEAT_COUNT] PROGMEM = { REPEAT_1(PREHEAT_COUNT, _PLBL) };
     return FPSTR((PGM_P)pgm_read_ptr(&preheat_labels[m]));
+  }
+
+  FSTR_P MarlinUI::get_preheat_select_label() {
+    return preheat_select == 0 ? GET_TEXT_F(MSG_PREHEAT_FACTORY) : get_preheat_label(preheat_select - 1);
+  }
+
+  void MarlinUI::set_preheat_select(const uint8_t v) {
+    preheat_select = v > PREHEAT_COUNT ? 0 : v;
+    #if ENABLED(LEVEING_CALIBRATION_MODULE)
+      // Persist in the calibration flash sector (does not touch EEPROM settings)
+      autoProbe.need_save_data = true;
+      autoProbe.write();
+    #endif
   }
 
   void MarlinUI::apply_preheat(const uint8_t m, const uint8_t pmask, const uint8_t e/*=motion.extruder*/) {
@@ -771,8 +785,12 @@ void MarlinUI::init() {
             if ((busy || Paused) && (card.isPrinting() || did_pause_print))
               return goto_screen(tft_stop_print);
             else if (!Paused && !busy) {
-              thermalManager.temp_hotend[0].target = 190;
-              thermalManager.temp_bed.target = 60;
+              if (preheat_select == 0) {
+                thermalManager.temp_hotend[0].target = 190;
+                thermalManager.temp_bed.target = 60;
+              }
+              else
+                apply_preheat(preheat_select - 1, PT_ALL);
             }
             break;
           case 4: // Nozzle temperature

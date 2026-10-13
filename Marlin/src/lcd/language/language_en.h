@@ -105,6 +105,9 @@ namespace LanguageNarrow_en {
   LSTR MSG_PREHEAT_M_ALL                  = _UxGT("Preheat $ All");
   LSTR MSG_PREHEAT_M_BEDONLY              = _UxGT("Preheat $ Bed");
   LSTR MSG_PREHEAT_M_SETTINGS             = _UxGT("Preheat $ Conf");
+  LSTR MSG_PREHEAT_SELECT                 = _UxGT("Preheat preset $");
+  LSTR MSG_PREHEAT_SELECT_ITEM            = _UxGT("Preset $");
+  LSTR MSG_PREHEAT_FACTORY                = _UxGT("Factory");
   LSTR MSG_COOLDOWN                       = _UxGT("Cooldown");
   LSTR MSG_SWITCH_PS_ON                   = _UxGT("Switch Power On");
   LSTR MSG_SWITCH_PS_OFF                  = _UxGT("Switch Power Off");

@@ -529,6 +529,16 @@ void menu_language();
     END_MENU();
   }
 
+  // Choose the preset used by the status screen Preheat tile (stored in the calibration flash)
+  void menu_preheat_select() {
+    START_MENU();
+    BACK_ITEM(MSG_CONFIGURATION);
+    ACTION_ITEM_f(GET_TEXT_F(MSG_PREHEAT_FACTORY), MSG_PREHEAT_SELECT_ITEM, []{ ui.set_preheat_select(0); });
+    for (uint8_t m = 0; m < PREHEAT_COUNT; ++m)
+      ACTION_ITEM_N_f(m + 1, ui.get_preheat_label(m), MSG_PREHEAT_SELECT_ITEM, []{ ui.set_preheat_select(MenuItemBase::itemIndex); });
+    END_MENU();
+  }
+
 #endif // HAS_PREHEAT && !SLIM_LCD_MENUS
 
 #if ENABLED(CUSTOM_MENU_CONFIG)
@@ -756,6 +766,7 @@ void menu_configuration() {
 
   // Preheat configurations
   #if HAS_PREHEAT && DISABLED(SLIM_LCD_MENUS)
+    SUBMENU_f(ui.get_preheat_select_label(), MSG_PREHEAT_SELECT, menu_preheat_select);
     for (uint8_t m = 0; m < PREHEAT_COUNT; ++m)
       SUBMENU_N_f(m, ui.get_preheat_label(m), MSG_PREHEAT_M_SETTINGS, _menu_configuration_preheat_settings);
   #endif

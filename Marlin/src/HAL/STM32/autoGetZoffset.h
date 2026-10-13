@@ -33,6 +33,7 @@
 
 typedef struct {
 	xyz_pos_t leveing_postion;
+	uint8_t preheat_select;		// 0 = factory 190/60, else preset index + 1
 }autoprobe_data;
 
 

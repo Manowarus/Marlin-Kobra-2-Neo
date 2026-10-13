@@ -949,4 +949,7 @@ namespace Language_ru {
   LSTR MSG_PREHEAT_3                      = _UxGT("Преднагрев ") PREHEAT_3_LABEL;
   LSTR MSG_TF_CARD_REMOVED                = _UxGT("Карта извлечена");
   LSTR MSG_Z_AFTER_HOME                   = _UxGT("Z после парковки");
+  LSTR MSG_PREHEAT_SELECT                 = _UxGT("Пресет нагрева $");
+  LSTR MSG_PREHEAT_SELECT_ITEM            = _UxGT("Пресет $");
+  LSTR MSG_PREHEAT_FACTORY                = _UxGT("Завод");
 }

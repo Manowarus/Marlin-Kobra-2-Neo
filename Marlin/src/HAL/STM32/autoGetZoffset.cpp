@@ -80,6 +80,9 @@ void AutoProbe::Shake()
 void AutoProbe::load_config()
 {
 	 read();
+	 // Clamp the stored preset index; old 12-byte records have no valid byte here
+	 if (postion_data.preheat_select > PREHEAT_COUNT) postion_data.preheat_select = 0;
+	 ui.preheat_select = postion_data.preheat_select;
 	 if (isnan(postion_data.leveing_postion.x) || isnan(postion_data.leveing_postion.y) ) 
 	 {
 		calibration_positon.x = NOZZLE_X;
@@ -118,7 +121,7 @@ void AutoProbe::load_config()
 void AutoProbe::read()
 {
 
-	memcpy(&postion_data.leveing_postion, (uint8_t *)(FLASH_AUTOGETZOFFSET_DATA_ADDR), sizeof(postion_data.leveing_postion));
+	memcpy(&postion_data, (uint8_t *)(FLASH_AUTOGETZOFFSET_DATA_ADDR), sizeof(postion_data));
 
 }
 
@@ -127,6 +130,7 @@ void AutoProbe::clean()
 	calibration_positon.x = postion_data.leveing_postion.x = NOZZLE_X;
 	calibration_positon.y = postion_data.leveing_postion.y = NOZZLE_Y;
 	calibration_positon.z =postion_data.leveing_postion.z = 0;
+	postion_data.preheat_select = ui.preheat_select; // Keep the user's preheat selection
 
 	if(persistentStore.FLASH_If_Erase(FLASH_AUTOGETZOFFSET_DATA_ADDR,FLASH_AUTOGETZOFFSET_DATA_ADDR+0x400) != FLASHIF_OK)
    	{
@@ -147,6 +151,7 @@ void AutoProbe::write()
 		postion_data.leveing_postion.x = calibration_positon.x;
 		postion_data.leveing_postion.y = calibration_positon.y;
 		postion_data.leveing_postion.z = calibration_positon.z ;
+		postion_data.preheat_select = ui.preheat_select;
 	   if(persistentStore.FLASH_If_Erase(FLASH_AUTOGETZOFFSET_DATA_ADDR,FLASH_AUTOGETZOFFSET_DATA_ADDR+0x400) != FLASHIF_OK)
    		{
 	 		SERIAL_ECHOLNPGM("erase error");
