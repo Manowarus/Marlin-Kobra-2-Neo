@@ -102,7 +102,7 @@ bool         MenuEditItemBase::liveEdit;
 //////// Menu Navigation & History /////////
 ////////////////////////////////////////////
 
-void MarlinUI::return_to_status() { goto_screen(status_screen); }
+void MarlinUI::return_to_status() { menu_calibration_cleanup(); goto_screen(status_screen); }
 
 void MarlinUI::push_current_screen() {
   if (screen_history_depth < COUNT(screen_history))

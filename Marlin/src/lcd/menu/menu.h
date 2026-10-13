@@ -271,6 +271,7 @@ void preheat_to_move_E();
 void factory_ui_tick();
 void filament_change();
 void menu_calibration();
+void menu_calibration_cleanup();
 void lcd_level_task();
 void menu_about();
 void Reset_setting();

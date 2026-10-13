@@ -273,8 +273,20 @@ void save_calibration() {
   queue.inject_P(PSTR("M2003 W"));
 }
 
-// Set when this menu turned the endstops on, so the main menu can turn them back off
+// Set when this menu turned the endstops on, so they can be turned back off on exit
 static bool calibration_endstops_on;
+
+// Restore the stock state when the Module Calibration screens are left
+void menu_calibration_cleanup() {
+  if (calibration_endstops_on) {
+    endstops.enable_globally(false);
+    calibration_endstops_on = false;
+  }
+  if (ui.module_calibration_flag) {
+    motion.soft_endstop._enabled = true;
+    ui.module_calibration_flag = false;
+  }
+}
 
 void menu_calibration() {
   // Poll the X/Y limit switches while this menu (and its jog screens) is open
@@ -335,11 +347,7 @@ void lcd_level_task() {
 }
 
 void menu_main() {
-  // Leaving the Module Calibration menu: restore the stock endstops-off state
-  if (calibration_endstops_on) {
-    endstops.enable_globally(false);
-    calibration_endstops_on = false;
-  }
+  menu_calibration_cleanup(); // Leaving the Module Calibration screens restores the stock endstops-off state
   START_MENU();
   BACK_ITEM(MSG_INFO_SCREEN);
 
