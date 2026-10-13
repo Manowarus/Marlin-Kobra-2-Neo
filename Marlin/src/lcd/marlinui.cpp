@@ -481,9 +481,6 @@ void MarlinUI::init() {
     }
 
     void MarlinUI::back_callbackFunc() {
-      #if ENABLED(LEVEING_CALIBRATION_MODULE)
-        autoProbe.can_move_calibration = false;
-      #endif
       manual_move.menu_scale = 1.0;
       motion.soft_endstop._enabled = true;
     }

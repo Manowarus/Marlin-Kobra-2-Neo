@@ -59,7 +59,6 @@ class AutoProbe
 		bool need_home_leveing;//
 	  	bool LeveingFailSattue;	//probe faild
 	  	bool calibration_finsh;
-		bool can_move_calibration;
 		uint8_t LeveingTipStatus;//
 		uint32_t count;
 		xyz_pos_t calibration_positon;	//

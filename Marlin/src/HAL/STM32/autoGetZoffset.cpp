@@ -347,7 +347,6 @@ bool AutoProbe::module_calibration()
 		SERIAL_ECHOLNPGM("module_calibration_z1:", z1);
 
 		//
-		can_move_calibration = true;
 		enable_calibration_module = false;
 		endstops.enable_globally(false);
 		endstops.enable_z_probe(false);

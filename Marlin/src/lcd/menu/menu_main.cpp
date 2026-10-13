@@ -31,6 +31,7 @@
 #include "menu_item.h"
 #include "../../module/temperature.h"
 #include "../../module/motion.h"
+#include "../../module/endstops.h"
 #include "../../gcode/queue.h"
 #include "../../module/printcounter.h"
 #include "../../module/stepper.h"
@@ -272,7 +273,15 @@ void save_calibration() {
   queue.inject_P(PSTR("M2003 W"));
 }
 
+// Set when this menu turned the endstops on, so the main menu can turn them back off
+static bool calibration_endstops_on;
+
 void menu_calibration() {
+  // Poll the X/Y limit switches while this menu (and its jog screens) is open
+  if (!endstops.global_enabled()) {
+    endstops.enable_globally(true);
+    calibration_endstops_on = true;
+  }
   START_MENU();
   BACK_ITEM(MSG_BACK);
   ACTION_ITEM(MSG_POSITION_CALIBRATION, move_calibration);
@@ -326,6 +335,11 @@ void lcd_level_task() {
 }
 
 void menu_main() {
+  // Leaving the Module Calibration menu: restore the stock endstops-off state
+  if (calibration_endstops_on) {
+    endstops.enable_globally(false);
+    calibration_endstops_on = false;
+  }
   START_MENU();
   BACK_ITEM(MSG_INFO_SCREEN);
 

@@ -57,7 +57,7 @@ constexpr bool has_large_area() {
 void lcd_move_axis(const AxisEnum axis) {
   if (ui.use_click()) {
     #if ENABLED(LEVEING_CALIBRATION_MODULE)
-      if (ui.module_calibration_flag == true && motion.soft_endstop._enabled == false && autoProbe.can_move_calibration == true) {
+      if (ui.module_calibration_flag == true && motion.soft_endstop._enabled == false) {
         autoProbe.calibration_positon.x = motion.position.x;
         autoProbe.calibration_positon.y = motion.position.y;
       }
@@ -73,8 +73,8 @@ void lcd_move_axis(const AxisEnum axis) {
     float min, max;
     motion.soft_endstop.get_manual_axis_limits(axis, min, max);
     if (!motion.soft_endstop.enabled()) {
-      if (axis == X_AXIS) max = 230;
-      else if (axis == Y_AXIS) max = 242;
+      if (axis == X_AXIS) { max = 230; min = X_MIN_POS; }
+      else if (axis == Y_AXIS) { max = 242; min = Y_MIN_POS; }
     }
 
     // Delta limits XY based on the current offset from center
