@@ -148,11 +148,12 @@ void AutoProbe::write()
 {
 
   if(need_save_data ){
-		// Keep the saved point inside the window load_config() accepts
-		LIMIT(calibration_positon.x, NOZZLE_X - ADD_DEC, NOZZLE_X + ADD_DEC);
-		LIMIT(calibration_positon.y, NOZZLE_Y - ADD_DEC, NOZZLE_Y + ADD_DEC);
-		postion_data.leveing_postion.x = calibration_positon.x;
-		postion_data.leveing_postion.y = calibration_positon.y;
+		// Save a point inside the window load_config() accepts, without changing the in-session point
+		float x = calibration_positon.x, y = calibration_positon.y;
+		LIMIT(x, NOZZLE_X - ADD_DEC, NOZZLE_X + ADD_DEC);
+		LIMIT(y, NOZZLE_Y - ADD_DEC, NOZZLE_Y + ADD_DEC);
+		postion_data.leveing_postion.x = x;
+		postion_data.leveing_postion.y = y;
 		postion_data.leveing_postion.z = calibration_positon.z ;
 		TERN_(HAS_PREHEAT, postion_data.preheat_select = ui.preheat_select);
 	   if(persistentStore.FLASH_If_Erase(FLASH_AUTOGETZOFFSET_DATA_ADDR,FLASH_AUTOGETZOFFSET_DATA_ADDR+0x400) != FLASHIF_OK)
