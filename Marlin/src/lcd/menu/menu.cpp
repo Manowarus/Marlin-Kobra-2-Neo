@@ -1140,13 +1140,20 @@ void preheat_to_move_E() {
 
 // Periodic redraw for factory screens that show live values, at a low rate
 void factory_ui_tick() {
+  static screenFunc_t last_screen = nullptr; // Screen that owns the deadline
   static millis_t next_tick_ms = 0;
+  const screenFunc_t screen = ui.currentScreen;
+  if (screen != lcd_level_top_windown && screen != preheat_to_move_E) return;
+  const bool leveling = screen == lcd_level_top_windown;
   const millis_t ms = millis();
-  const bool leveling = ui.currentScreen == lcd_level_top_windown;
-  if (!leveling && ui.currentScreen != preheat_to_move_E) return;
+  if (screen != last_screen) {                                 // Re-arm the deadline for the new screen
+    last_screen = screen;
+    next_tick_ms = ms + (leveling ? 250 : 1000);
+    return;
+  }
   if (ELAPSED(ms, next_tick_ms)) {
     next_tick_ms = ms + (leveling ? 250 : 1000);
-    ui.refresh(LCDVIEW_REDRAW_NOW);
+    if (!ui.should_draw()) ui.refresh(LCDVIEW_REDRAW_NOW);     // Do not clobber a pending full clear
   }
 }
 
