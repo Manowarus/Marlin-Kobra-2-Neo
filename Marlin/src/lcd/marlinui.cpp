@@ -1216,21 +1216,23 @@ void MarlinUI::init() {
         if (lastEncoderDiff != encoderDiff) wake_display();
 
         // Did the encoder turn by more than "Encoder Pulses Per Step" ticks?
-        uint8_t abs_diff = ABS(encoderDiff);
+        uint8_t abs_diff;
 
         #if ENCODER_PULSES_PER_STEP > 1
           // encoderDiff is updated from the temperature ISR, so guard the residual handling
           CRITICAL_SECTION_START();
           abs_diff = ABS(encoderDiff);
-          if ((encoderDiff ^ lastEncoderDiff) < 0)              // Direction change: drop the carried residual
-            encoderDiff = 0;
+          const int16_t diff_in = int16_t(encoderDiff) - int16_t(lastEncoderDiff); // Pulses since the last pass
+          if (lastEncoderDiff && diff_in && ((diff_in < 0) != (lastEncoderDiff < 0)))
+            encoderDiff = int8_t(diff_in);              // Reversed: drop the old residual, keep the new pulses
           else if (encoderDiff == lastEncoderDiff && abs_diff <= epps / 2)
-            encoderDiff = 0;                                    // Idle between pulses: drop a sub-half-step nudge
-          else if (WITHIN(abs_diff, epps / 2 + 1, epps - 1)) {  // A past-half-step detent counts as one step
-            abs_diff = epps;
-            encoderDiff = (encoderDiff < 0 ? -1 : 1) * abs_diff;
-          }
+            encoderDiff = 0;                            // Idle: drop a sub-half-step nudge
+          else if (WITHIN(abs_diff, epps / 2 + 1, epps - 1))
+            encoderDiff = (encoderDiff < 0 ? -1 : 1) * epps; // A past-half-step detent counts as one step
+          abs_diff = ABS(encoderDiff);
           CRITICAL_SECTION_END();
+        #else
+          abs_diff = ABS(encoderDiff);
         #endif
 
         const bool encoderPastThreshold = (abs_diff >= epps);
@@ -1273,7 +1275,7 @@ void MarlinUI::init() {
           // Consume whole steps; menus keep the sub-step remainder, edit screens use the old rate scaling
           CRITICAL_SECTION_START();
           if (encoder_multiplier == 1 && can_encode() && !lcd_clicked) {
-            const int8_t fullSteps = encoderDiff / epps;
+            const int16_t fullSteps = encoderDiff / epps;
             if (fullSteps) {
               encoderDiff -= fullSteps * epps;
               encoderPosition += fullSteps;
@@ -1283,11 +1285,14 @@ void MarlinUI::init() {
             if (can_encode() && !lcd_clicked) encoderPosition += (encoderDiff * encoder_multiplier) / epps;
             encoderDiff = 0;
           }
+          lastEncoderDiff = encoderDiff; // Store the residual in the same critical section
           CRITICAL_SECTION_END();
         }
-
-        // Store the residual as the baseline for the next pass
-        lastEncoderDiff = encoderDiff;
+        else {
+          CRITICAL_SECTION_START();
+          lastEncoderDiff = encoderDiff;
+          CRITICAL_SECTION_END();
+        }
 
         // Has the wheel advanced by a step or the encoder done a click?
         if (encoderPastThreshold || lcd_clicked) {
