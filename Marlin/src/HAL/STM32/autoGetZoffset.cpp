@@ -284,6 +284,7 @@ bool AutoProbe::run_calibration_probe()
 			endstops.enable_globally(global_enabled_saved);
 			endstops.enable_z_probe(z_probe_saved);
 			motion.soft_endstop._enabled = soft_endstop_saved;
+			need_z_down = need_shake = need_move_x = false; // Do not inject the calibration moves on the next probe
 			return 1;
 		}
 		
