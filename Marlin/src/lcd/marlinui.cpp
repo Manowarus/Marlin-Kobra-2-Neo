@@ -190,7 +190,9 @@ constexpr uint8_t epps = ENCODER_PULSES_PER_STEP;
   }
 
   void MarlinUI::set_preheat_select(const uint8_t v) {
-    preheat_select = v > PREHEAT_COUNT ? 0 : v;
+    const uint8_t sel = v > PREHEAT_COUNT ? 0 : v;
+    if (sel == preheat_select) return; // Unchanged: skip the flash write
+    preheat_select = sel;
     #if ENABLED(LEVEING_CALIBRATION_MODULE)
       // Persist in the calibration flash sector (does not touch EEPROM settings)
       autoProbe.need_save_data = true;
