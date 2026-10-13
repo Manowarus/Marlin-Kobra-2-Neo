@@ -1131,6 +1131,7 @@ void MarlinUI::init() {
       #endif
       unload_load_filament();
       factory_ui_tick();
+      if (marlin.printJobOngoing()) menu_calibration_cleanup(); // A job may start while the calibration screens are open
 
       // If the action button is pressed...
       static bool wait_for_unclick; // = false

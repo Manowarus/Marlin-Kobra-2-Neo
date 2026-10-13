@@ -290,8 +290,9 @@ void menu_calibration_cleanup() {
 }
 
 void menu_calibration() {
-  // Poll the X/Y limit switches while this menu (and its jog screens) is open
-  if (!endstops.global_enabled()) {
+  // Poll the X/Y limit switches while this menu (and its jog screens) is open;
+  // stay off during a job so a host-started print cannot be aborted
+  if (!marlin.printJobOngoing() && !endstops.global_enabled()) {
     endstops.enable_globally(true);
     calibration_endstops_on = true;
   }
