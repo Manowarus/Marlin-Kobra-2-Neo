@@ -288,7 +288,7 @@ bool AutoProbe::run_calibration_probe()
 			endstops.enable_globally(global_enabled_saved);
 			endstops.enable_z_probe(z_probe_saved);
 			motion.soft_endstop._enabled = soft_endstop_saved;
-			need_z_down = need_shake = need_move_x = false; // Do not inject the calibration moves on the next probe
+			need_z_down = need_shake = false; // Do not inject the calibration moves on the next probe
 			return 1;
 		}
 		
@@ -306,7 +306,7 @@ bool AutoProbe::run_calibration_probe()
 		motion.soft_endstop._enabled = soft_endstop_saved;
 		LeveingFailSattue = false;
 		need_home_leveing = false;
-		need_z_down = need_shake = need_move_x = false;
+		need_z_down = need_shake = false;
 		
 		return 0;
 
@@ -360,7 +360,7 @@ bool AutoProbe::module_calibration()
 		enable_calibration_module = false;
 		LeveingFailSattue = false;
 		enable_probe_swtich = 	false;
-		need_z_down = need_move_x = need_shake = false;
+		need_z_down = need_shake = false;
 		planner.synchronize();
 		
 		probe.stow();

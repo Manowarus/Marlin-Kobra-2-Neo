@@ -52,7 +52,6 @@ class AutoProbe
 		bool start_leveing;//
 		bool need_save_data;	//
 		bool need_z_down;//
-		bool need_move_x;//
 		bool need_shake;//
 		bool need_close_fan;//
 		bool swtich_cool_fan;
