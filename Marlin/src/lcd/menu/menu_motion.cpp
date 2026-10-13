@@ -57,10 +57,12 @@ constexpr bool has_large_area() {
 void lcd_move_axis(const AxisEnum axis) {
   if (ui.use_click()) {
     #if ENABLED(LEVEING_CALIBRATION_MODULE)
-      if (ui.module_calibration_flag == true && motion.soft_endstop._enabled == false) {
-        autoProbe.calibration_positon.x = motion.position.x;
-        autoProbe.calibration_positon.y = motion.position.y;
-        if (ui.soft_endstop_saved >= 0) { // Jog finished: restore the user's soft-endstop state
+      if (ui.module_calibration_flag == true) {
+        if (motion.soft_endstop._enabled == false) { // Jog ended with soft limits still off: save the point
+          autoProbe.calibration_positon.x = motion.position.x;
+          autoProbe.calibration_positon.y = motion.position.y;
+        }
+        if (ui.soft_endstop_saved >= 0) {            // Restore the user's soft-endstop state
           motion.soft_endstop._enabled = ui.soft_endstop_saved;
           ui.soft_endstop_saved = -1;
         }

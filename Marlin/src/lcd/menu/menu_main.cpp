@@ -290,38 +290,38 @@ void menu_calibration_cleanup() {
   ui.module_calibration_flag = false;
 }
 
+// Calibration jog screen; soft endstops are restored in lcd_move_axis() when the jog ends
+static void lcd_move_calibration_axis(const AxisEnum axis, const float scale) {
+  if (ui.soft_endstop_saved < 0) ui.soft_endstop_saved = motion.soft_endstop._enabled;
+  motion.soft_endstop._enabled = false;
+  ui.module_calibration_flag = true;
+  ui.manual_move.menu_scale = scale;
+  lcd_move_axis(axis);
+}
+
 void menu_calibration() {
-  // Poll the X/Y limit switches while this menu (and its jog screens) is open;
-  // stay off during a job so a host-started print cannot be aborted
-  if (!marlin.printJobOngoing() && !marlin.printingIsPaused() && !endstops.global_enabled()) {
+  // No calibration moves while a job is printing or paused (a host can start one with this menu open)
+  if (marlin.printJobOngoing() || marlin.printingIsPaused()) {
+    START_MENU();
+    BACK_ITEM(MSG_BACK);
+    END_MENU();
+    return;
+  }
+  // Poll the X/Y limit switches while this menu (and its jog screens) is open
+  if (!endstops.global_enabled()) {
     endstops.enable_globally(true);
     calibration_endstops_on = true;
   }
+  ui.fresh_flag = true; // The jog screens draw their frame on first entry
   START_MENU();
   BACK_ITEM(MSG_BACK);
   ACTION_ITEM(MSG_POSITION_CALIBRATION, move_calibration);
   ACTION_ITEM(MSG_BUTTON_SAVE, save_calibration);
 
-  SUBMENU_N(X_AXIS, MSG_MOVE_X_1MM, []{
-    if (ui.soft_endstop_saved < 0) ui.soft_endstop_saved = motion.soft_endstop._enabled;
-    motion.soft_endstop._enabled = false;
-    ui.module_calibration_flag = true; ui.manual_move.menu_scale = 1; lcd_move_axis(X_AXIS);
-  });
-  SUBMENU_N(X_AXIS, MSG_MOVE_X_01MM, []{
-    if (ui.soft_endstop_saved < 0) ui.soft_endstop_saved = motion.soft_endstop._enabled;
-    motion.soft_endstop._enabled = false;
-    ui.module_calibration_flag = true; ui.manual_move.menu_scale = 0.1; lcd_move_axis(X_AXIS);
-  });
-  SUBMENU_N(Y_AXIS, MSG_MOVE_Y_1MM, []{
-    if (ui.soft_endstop_saved < 0) ui.soft_endstop_saved = motion.soft_endstop._enabled;
-    motion.soft_endstop._enabled = false;
-    ui.module_calibration_flag = true; ui.manual_move.menu_scale = 1; lcd_move_axis(Y_AXIS);
-  });
-  SUBMENU_N(Y_AXIS, MSG_MOVE_Y_01MM, []{
-    if (ui.soft_endstop_saved < 0) ui.soft_endstop_saved = motion.soft_endstop._enabled;
-    motion.soft_endstop._enabled = false;
-    ui.module_calibration_flag = true; ui.manual_move.menu_scale = 0.1; lcd_move_axis(Y_AXIS);
-  });
+  SUBMENU_N(X_AXIS, MSG_MOVE_X_1MM,  []{ lcd_move_calibration_axis(X_AXIS, 1); });
+  SUBMENU_N(X_AXIS, MSG_MOVE_X_01MM, []{ lcd_move_calibration_axis(X_AXIS, 0.1f); });
+  SUBMENU_N(Y_AXIS, MSG_MOVE_Y_1MM,  []{ lcd_move_calibration_axis(Y_AXIS, 1); });
+  SUBMENU_N(Y_AXIS, MSG_MOVE_Y_01MM, []{ lcd_move_calibration_axis(Y_AXIS, 0.1f); });
 
   END_MENU();
 }

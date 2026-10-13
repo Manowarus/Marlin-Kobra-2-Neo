@@ -202,7 +202,7 @@ bool AutoProbe::run_calibration_probe()
 {
 	const bool global_enabled_saved = endstops.global_enabled();
 	const bool z_probe_saved = endstops.z_probe_enabled;
-	const bool soft_endstop_saved = motion.soft_endstop._enabled;
+	const bool soft_endstop_entry = motion.soft_endstop._enabled;
 
 	xy_pos_t nozzle_position = {
     parser.linearval('X', motion.position.x + probe.offset_xy.x),  // If no X use the probe's current X position
@@ -287,7 +287,7 @@ bool AutoProbe::run_calibration_probe()
 			LeveingFailSattue = true;
 			endstops.enable_globally(global_enabled_saved);
 			endstops.enable_z_probe(z_probe_saved);
-			motion.soft_endstop._enabled = soft_endstop_saved;
+			motion.soft_endstop._enabled = soft_endstop_entry;
 			need_z_down = need_shake = false; // Do not inject the calibration moves on the next probe
 			return 1;
 		}
@@ -303,7 +303,7 @@ bool AutoProbe::run_calibration_probe()
 		probe.stow();
 		endstops.enable_globally(global_enabled_saved);
 		endstops.enable_z_probe(z_probe_saved);
-		motion.soft_endstop._enabled = soft_endstop_saved;
+		motion.soft_endstop._enabled = soft_endstop_entry;
 		LeveingFailSattue = false;
 		need_home_leveing = false;
 		need_z_down = need_shake = false;
@@ -333,7 +333,7 @@ bool AutoProbe::module_calibration()
 		float z1;
 		const bool global_enabled_saved = endstops.global_enabled();
 		const bool z_probe_saved = endstops.z_probe_enabled;
-		const bool soft_endstop_saved = motion.soft_endstop._enabled;
+		const bool soft_endstop_entry = motion.soft_endstop._enabled;
 		motion.soft_endstop._enabled = false;
 		enable_probe_swtich = true;		
 
@@ -368,7 +368,7 @@ bool AutoProbe::module_calibration()
 		// Restore the endstop state saved on entry, on both exits
 		endstops.enable_globally(global_enabled_saved);
 		endstops.enable_z_probe(z_probe_saved);
-		motion.soft_endstop._enabled = soft_endstop_saved;
+		motion.soft_endstop._enabled = soft_endstop_entry;
 		//
 		if (isnan(z1)) {
 			LeveingFailSattue = true;
