@@ -785,12 +785,17 @@ void MarlinUI::init() {
             if ((busy || Paused) && (card.isPrinting() || did_pause_print))
               return goto_screen(tft_stop_print);
             else if (!Paused && !busy) {
-              if (preheat_select == 0) {
-                thermalManager.temp_hotend[0].target = 190;
-                thermalManager.temp_bed.target = 60;
-              }
-              else
-                apply_preheat(preheat_select - 1, PT_ALL);
+              #if HAS_PREHEAT
+                if (preheat_select == 0) {
+                  thermalManager.setTargetHotend(190, 0);
+                  thermalManager.setTargetBed(60);
+                }
+                else
+                  apply_preheat(preheat_select - 1, PT_ALL);
+              #else
+                thermalManager.setTargetHotend(190, 0);
+                thermalManager.setTargetBed(60);
+              #endif
             }
             break;
           case 4: // Nozzle temperature
