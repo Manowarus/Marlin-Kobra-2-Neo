@@ -246,6 +246,7 @@ constexpr uint8_t epps = ENCODER_PULSES_PER_STEP;
 #if HAS_ENCODER_ACTION
   uint32_t MarlinUI::encoderPosition;
   volatile int8_t encoderDiff; // Updated in update_buttons, added to encoderPosition every LCD update
+  static int8_t lastEncoderDiff; // encoderDiff seen by the previous pass, for residual handling
 #endif
 
 #if HAS_BACKLIGHT_TIMEOUT
@@ -1063,6 +1064,7 @@ void MarlinUI::init() {
         if (external_control && encoderDiff) {
           bedlevel.encoder_diff += encoderDiff; // Encoder for UBL G29 mesh editing
           encoderDiff = 0;                      // Hide encoder events from the screen handler
+          lastEncoderDiff = 0;                  // Restart from a clean baseline
           refresh(LCDVIEW_REDRAW_NOW);          // ...but keep the refresh.
         }
       }
@@ -1154,6 +1156,7 @@ void MarlinUI::init() {
             if (ELAPSED(ms, next_button_update_ms)) {
               encoderDiff = (ENCODER_STEPS_PER_MENU_ITEM) * epps * encoderDirection;
               if (touch_buttons & EN_A) encoderDiff *= -1;
+              lastEncoderDiff = 0;                          // Touch steps start from a clean baseline
               TERN_(AUTO_BED_LEVELING_UBL, external_encoder());
               next_button_update_ms = ms + repeat_delay;    // Assume the repeat delay
               if (!wait_for_unclick) {
@@ -1217,7 +1220,6 @@ void MarlinUI::init() {
           reset_status_timeout(ms);
 
         // Wake the display for any encoder movement
-        static int8_t lastEncoderDiff;
         if (lastEncoderDiff != encoderDiff) wake_display();
 
         // Did the encoder turn by more than "Encoder Pulses Per Step" ticks?
@@ -2100,8 +2102,10 @@ uint8_t expand_u8str_P(char * const outstr, PGM_P const ptpl, const int8_t ind, 
       next_button_update_ms = now + repeat_delay;    // Assume the repeat delay
       const int8_t xdir = col < (LCD_WIDTH ) / 2 ? -1 : 1,
                    ydir = row < (LCD_HEIGHT) / 2 ? -1 : 1;
-      if (on_edit_screen)
+      if (on_edit_screen) {
         encoderDiff = epps * ydir;
+        lastEncoderDiff = 0; // Touch steps start from a clean baseline
+      }
       else if (screen_items > 0) {
         // Last 5 cols act as a scroll :-)
         if (col > (LCD_WIDTH) - 5)
@@ -2109,9 +2113,12 @@ uint8_t expand_u8str_P(char * const outstr, PGM_P const ptpl, const int8_t ind, 
           encoderDiff = epps * (encoderLine - encoderTopLine + 2 * (LCD_HEIGHT)) * ydir;
         else
           encoderDiff = epps * (row - encoderPosition + encoderTopLine);
+        lastEncoderDiff = 0;
       }
-      else if (!on_status_screen())
+      else if (!on_status_screen()) {
         encoderDiff = epps * xdir;
+        lastEncoderDiff = 0;
+      }
     }
 
   #endif
