@@ -827,10 +827,12 @@ void printinf_finish() {
 }
 
 // Probe / calibration failure screen
+static bool probing_failed_soft_endstops; // Soft-endstop state to restore on dismiss
+
 void Probing_Failed() {
   if (ui.use_click()) {
     ui.clear_all = false;
-    motion.soft_endstop._enabled = true; // The failure path left them off
+    motion.soft_endstop._enabled = probing_failed_soft_endstops; // Restore what was set when the screen opened
     #if ENABLED(LEVEING_CALIBRATION_MODULE)
       autoProbe.LeveingFailSattue = false;
     #endif
@@ -866,6 +868,7 @@ void MarlinUI::StatusChange(const char * const msg, const bool persist) {
 
   if (strcmp_P(msg, GET_TEXT(MSG_LCD_PROBING_FAILED)) == 0) {
     lcdLeveingstate = LEVEING_NONE;
+    probing_failed_soft_endstops = motion.soft_endstop._enabled; // Remember the user's state for the dismiss
     motion.soft_endstop._enabled = false;
     calibration_state = false;
     queue.inject_P(PSTR("G1 Z20 F500"));
