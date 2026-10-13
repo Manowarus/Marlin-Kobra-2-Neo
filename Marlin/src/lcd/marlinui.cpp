@@ -1212,15 +1212,18 @@ void MarlinUI::init() {
         uint8_t abs_diff = ABS(encoderDiff);
 
         #if ENCODER_PULSES_PER_STEP > 1
-          // When reversing the encoder direction, a movement step can be missed because
-          // encoderDiff has a non-zero residual value, making the controller unresponsive.
-          // Clear the residual when the encoder is idle and promote a past-half-step to a full step.
-          if (encoderDiff == lastEncoderDiff && abs_diff < epps)
+          // encoderDiff is updated from the temperature ISR, so guard the residual handling
+          CRITICAL_SECTION_START();
+          abs_diff = ABS(encoderDiff);
+          if ((encoderDiff ^ lastEncoderDiff) < 0)              // Direction change: drop the carried residual
             encoderDiff = 0;
-          else if (WITHIN(abs_diff, epps / 2 + 1, epps - 1)) {
+          else if (encoderDiff == lastEncoderDiff && abs_diff <= epps / 2)
+            encoderDiff = 0;                                    // Idle between pulses: drop a sub-half-step nudge
+          else if (WITHIN(abs_diff, epps / 2 + 1, epps - 1)) {  // A past-half-step detent counts as one step
             abs_diff = epps;
             encoderDiff = (encoderDiff < 0 ? -1 : 1) * abs_diff;
           }
+          CRITICAL_SECTION_END();
         #endif
 
         const bool encoderPastThreshold = (abs_diff >= epps);
@@ -1260,12 +1263,20 @@ void MarlinUI::init() {
 
           #endif // ENCODER_RATE_MULTIPLIER
 
-          // Keep the sub-step remainder so fast turns don't lose pulses
-          const int8_t fullSteps = encoderDiff / epps;
-          if (fullSteps) {
-            encoderDiff -= fullSteps * epps;
-            if (can_encode() && !lcd_clicked) encoderPosition += fullSteps * encoder_multiplier;
+          // Consume whole steps; menus keep the sub-step remainder, edit screens use the old rate scaling
+          CRITICAL_SECTION_START();
+          if (encoder_multiplier == 1 && can_encode() && !lcd_clicked) {
+            const int8_t fullSteps = encoderDiff / epps;
+            if (fullSteps) {
+              encoderDiff -= fullSteps * epps;
+              encoderPosition += fullSteps;
+            }
           }
+          else {
+            if (can_encode() && !lcd_clicked) encoderPosition += (encoderDiff * encoder_multiplier) / epps;
+            encoderDiff = 0;
+          }
+          CRITICAL_SECTION_END();
         }
 
         // Store the residual as the baseline for the next pass
