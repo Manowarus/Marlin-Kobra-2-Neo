@@ -484,8 +484,10 @@ void MarlinUI::init() {
 
     void MarlinUI::back_callbackFunc() {
       manual_move.menu_scale = 1.0;
-      motion.soft_endstop._enabled = true;
-      module_calibration_flag = false; // Back from a calibration jog ends the jog flow
+      if (module_calibration_flag) {          // Jog flow changed it: restore and end the flow
+        motion.soft_endstop._enabled = true;
+        module_calibration_flag = false;
+      }
     }
 
     screenFunc_t MarlinUI::currentScreen; // Initialized in CTOR
