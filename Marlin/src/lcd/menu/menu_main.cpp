@@ -29,6 +29,7 @@
 #if HAS_MARLINUI_MENU
 
 #include "menu_item.h"
+#include "../../MarlinCore.h"
 #include "../../module/temperature.h"
 #include "../../module/motion.h"
 #include "../../module/endstops.h"
@@ -364,8 +365,9 @@ void menu_main() {
   // Auto Level
   SUBMENU(MSG_LEVEL_BED, lcd_level_task);
 
-  // Module calibration
-  SUBMENU(MSG_MODULE_CALIBRATION, menu_calibration);
+  // Module calibration (it moves the head, so not while printing)
+  if (!marlin.printingIsActive())
+    SUBMENU(MSG_MODULE_CALIBRATION, menu_calibration);
 
   // More Configuration
   SUBMENU(MSG_MORE_CONFIG, menu_configuration);
