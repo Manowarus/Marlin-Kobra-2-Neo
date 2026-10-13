@@ -533,7 +533,7 @@ void menu_language();
   void menu_preheat_select() {
     START_MENU();
     BACK_ITEM(MSG_CONFIGURATION);
-    if (!marlin.printJobOngoing()) { // No flash writes while a job is ongoing
+    if (!marlin.printJobOngoing() && !marlin.printingIsPaused()) { // No flash writes while a job is ongoing
       ACTION_ITEM_f(GET_TEXT_F(MSG_PREHEAT_FACTORY), MSG_PREHEAT_SELECT_ITEM, []{ ui.set_preheat_select(0); });
       for (uint8_t m = 0; m < PREHEAT_COUNT; ++m)
         ACTION_ITEM_N_f(m + 1, ui.get_preheat_label(m), MSG_PREHEAT_SELECT_ITEM, []{ ui.set_preheat_select(MenuItemBase::itemIndex); });
@@ -768,7 +768,7 @@ void menu_configuration() {
 
   // Preheat configurations
   #if HAS_PREHEAT && DISABLED(SLIM_LCD_MENUS)
-    if (!busy && !marlin.printJobOngoing()) SUBMENU_f(ui.get_preheat_select_label(), MSG_PREHEAT_SELECT, menu_preheat_select); // Writes flash on change
+    if (!busy && !marlin.printJobOngoing() && !marlin.printingIsPaused()) SUBMENU_f(ui.get_preheat_select_label(), MSG_PREHEAT_SELECT, menu_preheat_select); // Writes flash on change
     for (uint8_t m = 0; m < PREHEAT_COUNT; ++m)
       SUBMENU_N_f(m, ui.get_preheat_label(m), MSG_PREHEAT_M_SETTINGS, _menu_configuration_preheat_settings);
   #endif

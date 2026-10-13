@@ -293,6 +293,7 @@ void menu_calibration_cleanup() {
 void menu_calibration() {
   // Poll the X/Y limit switches while this menu (and its jog screens) is open;
   // stay off during a job so a host-started print cannot be aborted
+  if (!marlin.printJobOngoing() && !marlin.printingIsPaused() && !endstops.global_enabled()) {
     endstops.enable_globally(true);
     calibration_endstops_on = true;
   }
@@ -383,7 +384,7 @@ void menu_main() {
   SUBMENU(MSG_LEVEL_BED, lcd_level_task);
 
   // Module calibration (it moves the head, so not during a print or pause)
-  if (!marlin.printJobOngoing())
+  if (!marlin.printJobOngoing() && !marlin.printingIsPaused())
     SUBMENU(MSG_MODULE_CALIBRATION, menu_calibration);
 
   // More Configuration
