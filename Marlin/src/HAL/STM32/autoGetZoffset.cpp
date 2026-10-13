@@ -148,6 +148,9 @@ void AutoProbe::write()
 {
 
   if(need_save_data ){
+		// Keep the saved point inside the window load_config() accepts
+		LIMIT(calibration_positon.x, NOZZLE_X - ADD_DEC, NOZZLE_X + ADD_DEC);
+		LIMIT(calibration_positon.y, NOZZLE_Y - ADD_DEC, NOZZLE_Y + ADD_DEC);
 		postion_data.leveing_postion.x = calibration_positon.x;
 		postion_data.leveing_postion.y = calibration_positon.y;
 		postion_data.leveing_postion.z = calibration_positon.z ;
