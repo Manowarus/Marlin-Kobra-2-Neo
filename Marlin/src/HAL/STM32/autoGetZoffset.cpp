@@ -360,16 +360,17 @@ bool AutoProbe::module_calibration()
 		
 		probe.stow();
 		thermalManager.set_fan_speed(0, 0);//
-		// Restore the endstop state saved on entry (covers both exits)
+		// Restore the endstops saved on entry; soft endstops follow the stock rules below
 		endstops.enable_globally(global_enabled_saved);
 		endstops.enable_z_probe(z_probe_saved);
-		motion.soft_endstop._enabled = soft_endstop_saved;
 		//
 		if (isnan(z1)) {
 			LeveingFailSattue = true;
+			motion.soft_endstop._enabled = soft_endstop_saved; // Failure: the failure screen handles the state
 
 			return 1;
 		}
+		motion.soft_endstop._enabled = true; // Stock: soft endstops back on after a successful calibration
 		LCD_MESSAGE(MSG_CALIBRATION_DONE); // Factory: close the "Position Calibration" screen
 		//calibration_finsh = true;
 		//ui.goto_previous_screen();
