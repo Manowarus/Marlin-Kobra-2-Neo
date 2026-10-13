@@ -1228,7 +1228,7 @@ void MarlinUI::init() {
           CRITICAL_SECTION_START();
           abs_diff = ABS(encoderDiff);
           const int16_t diff_in = int16_t(encoderDiff) - int16_t(lastEncoderDiff); // Pulses since the last pass
-          if (lastEncoderDiff && diff_in && ((diff_in < 0) != (lastEncoderDiff < 0)))
+          if (lastEncoderDiff && diff_in && WITHIN(diff_in, -127, 127) && ((diff_in < 0) != (lastEncoderDiff < 0)))
             encoderDiff = int8_t(diff_in);              // Reversed: drop the old residual, keep the new pulses
           else if (encoderDiff == lastEncoderDiff && abs_diff <= epps / 2)
             encoderDiff = 0;                            // Idle: drop a sub-half-step nudge
