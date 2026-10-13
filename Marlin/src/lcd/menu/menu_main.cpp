@@ -365,8 +365,8 @@ void menu_main() {
   // Auto Level
   SUBMENU(MSG_LEVEL_BED, lcd_level_task);
 
-  // Module calibration (it moves the head, so not while printing)
-  if (!marlin.printingIsActive())
+  // Module calibration (it moves the head, so not during a print or pause)
+  if (!marlin.printJobOngoing())
     SUBMENU(MSG_MODULE_CALIBRATION, menu_calibration);
 
   // More Configuration
