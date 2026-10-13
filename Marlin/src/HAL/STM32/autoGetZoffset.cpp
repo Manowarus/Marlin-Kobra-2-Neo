@@ -196,7 +196,9 @@ void AutoProbe::calculation()
 
 bool AutoProbe::run_calibration_probe()
 {
-	
+	const bool global_enabled_saved = endstops.global_enabled();
+	const bool z_probe_saved = endstops.z_probe_enabled;
+	const bool soft_endstop_saved = motion.soft_endstop._enabled;
 
 	xy_pos_t nozzle_position = {
     parser.linearval('X', motion.position.x + probe.offset_xy.x),  // If no X use the probe's current X position
@@ -279,6 +281,9 @@ bool AutoProbe::run_calibration_probe()
 		{
 			SERIAL_ECHOLNPGM("calibration failed");
 			LeveingFailSattue = true;
+			endstops.enable_globally(global_enabled_saved);
+			endstops.enable_z_probe(z_probe_saved);
+			motion.soft_endstop._enabled = soft_endstop_saved;
 			return 1;
 		}
 		
@@ -290,10 +295,10 @@ bool AutoProbe::run_calibration_probe()
 
 		enable_probe_swtich = false;
 		enable_calibration_module = false;
-		endstops.enable_globally(false);
-		endstops.enable_z_probe(false);	
 		probe.stow();
-		motion.soft_endstop._enabled = true;
+		endstops.enable_globally(global_enabled_saved);
+		endstops.enable_z_probe(z_probe_saved);
+		motion.soft_endstop._enabled = soft_endstop_saved;
 		LeveingFailSattue = false;
 		need_home_leveing = false;
 		need_z_down = need_shake = need_move_x = false;
@@ -310,10 +315,7 @@ bool AutoProbe::ValibrationValueIsnan()
 			//probe faild
 			enable_calibration_module = false;
 			enable_probe_swtich = 	false;	
-			endstops.enable_globally(false);
-			endstops.enable_z_probe(false);
 			probe.stow();
-			motion.soft_endstop._enabled = true;
 			return 1;
 		}	
 		
@@ -324,6 +326,9 @@ bool AutoProbe::ValibrationValueIsnan()
 bool AutoProbe::module_calibration()
 {
 		float z1;
+		const bool global_enabled_saved = endstops.global_enabled();
+		const bool z_probe_saved = endstops.z_probe_enabled;
+		const bool soft_endstop_saved = motion.soft_endstop._enabled;
 		motion.soft_endstop._enabled = false;
 		enable_probe_swtich = true;		
 
@@ -348,23 +353,23 @@ bool AutoProbe::module_calibration()
 
 		//
 		enable_calibration_module = false;
-		endstops.enable_globally(false);
-		endstops.enable_z_probe(false);
 		LeveingFailSattue = false;
 		enable_probe_swtich = 	false;
 		need_z_down = need_move_x = need_shake = false;
 		planner.synchronize();
 		
 		probe.stow();
-		//motion.soft_endstop._enabled = true;
 		thermalManager.set_fan_speed(0, 0);//
+		// Restore the endstop state saved on entry (covers both exits)
+		endstops.enable_globally(global_enabled_saved);
+		endstops.enable_z_probe(z_probe_saved);
+		motion.soft_endstop._enabled = soft_endstop_saved;
 		//
 		if (isnan(z1)) {
 			LeveingFailSattue = true;
 
 			return 1;
 		}
-		motion.soft_endstop._enabled = true;
 		LCD_MESSAGE(MSG_CALIBRATION_DONE); // Factory: close the "Position Calibration" screen
 		//calibration_finsh = true;
 		//ui.goto_previous_screen();
